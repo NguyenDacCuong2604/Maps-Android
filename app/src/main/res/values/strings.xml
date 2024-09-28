@@ -1,9 +1,12 @@
 <resources>
-    <string name="app_name">Map</string>
+    <string name="app_name">Maps</string>
     <string name="mapbox_access_token">sk.eyJ1IjoiZGFjY3VvbmcyNjA0IiwiYSI6ImNtMWc2bDR5NDAwcHkybHF1cTVxejc0dGIifQ.k_zgJ5Bk4_VmEbI8lmRuIA</string>
     <string name="t_m_ki_m_y">Tìm kiếm ở đây</string>
     <string name="lo_i_b_n">Loại bản đồ</string>
     <string name="m_c_nh">Mặc định</string>
     <string name="v_tinh">Vệ tinh</string>
     <string name="a_h_nh">Địa hình</string>
+    <string name="ng_n_ng">Ngôn ngữ</string>
+    <string name="ti_ng_vi_t">Tiếng Việt</string>
+    <string name="ti_ng_anh">Tiếng Anh</string>
 </resources>

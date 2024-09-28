@@ -1,6 +1,7 @@
 package com.example.map.activities;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -28,10 +29,11 @@ import com.mapbox.maps.plugin.scalebar.*;
 import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings;
 import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettingsInterface;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements SelectStyleMapsFragment.OnMapStyleSelectedListener{
 
     private ActivityMainBinding activityMainBinding;
     private MapView mapView;
+    private SharedPreferences sharedPreferences;
 
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
@@ -48,7 +50,9 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        sharedPreferences = getSharedPreferences("Maps", MODE_PRIVATE);
         this.mapView = activityMainBinding.mapView;
+        loadStyleInPreferences();
         //Permission
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             activityResultLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -57,10 +61,32 @@ public class MainActivity extends AppCompatActivity{
         activityMainBinding.btnSelectStyle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SelectStyleMapsFragment selectStyleMapsFragment = SelectStyleMapsFragment.newInstance();
+                SelectStyleMapsFragment selectStyleMapsFragment = SelectStyleMapsFragment.newInstance(sharedPreferences.getString("mapStyle", Style.MAPBOX_STREETS));
                 selectStyleMapsFragment.show(getSupportFragmentManager(), "Select Style Maps");
             }
         });
+    }
+
+    public void loadStyleInPreferences(){
+        mapView.getMapboxMap().loadStyleUri(sharedPreferences.getString("mapStyle", Style.MAPBOX_STREETS));
+    }
+
+    @Override
+    public void onMapStyleSelected(String style) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        switch (style) {
+            case "default":
+                editor.putString("mapStyle", Style.MAPBOX_STREETS);
+                break;
+            case "satellite":
+                editor.putString("mapStyle", Style.SATELLITE_STREETS);
+                break;
+            case "terrain":
+                editor.putString("mapStyle", Style.OUTDOORS);
+                break;
+        }
+        editor.apply();
+        loadStyleInPreferences();
     }
 
 }
