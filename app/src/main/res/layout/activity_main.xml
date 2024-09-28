@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.MainActivity">
+
+        <LinearLayout
+            android:id="@+id/layoutSearch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="@drawable/layout_search"
+            android:padding="2dp"
+            android:elevation="@dimen/_16sdp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="@dimen/_12sdp"
+            android:layout_marginEnd="@dimen/_12sdp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/mapView">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="3dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/location" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/t_m_ki_m_y"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textColorHint="@color/gray"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="2dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_voice" />
+
+        </LinearLayout>
+
+        <com.mapbox.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            mapbox:mapbox_scaleBarBorderWidth="@dimen/_1sdp"
+            mapbox:mapbox_scaleBarHeight="@dimen/_2sdp"
+            mapbox:mapbox_scaleBarMarginLeft="@dimen/_12sdp"
+            mapbox:mapbox_scaleBarMarginTop="@dimen/_72sdp"
+            mapbox:mapbox_scaleBarPrimaryColor="@color/black"
+            mapbox:mapbox_scaleBarSecondaryColor="@color/white"
+            mapbox:mapbox_scaleBarTextBarMargin="@dimen/_6sdp"
+            mapbox:mapbox_scaleBarTextColor="@color/black"
+            mapbox:mapbox_scaleBarTextSize="@dimen/_12ssp"
+            mapbox:mapbox_scaleBarIsMetricUnits="true"
+            mapbox:mapbox_compassMarginRight="@dimen/_12sdp"
+            mapbox:mapbox_compassMarginTop="@dimen/_116sdp"
+            mapbox:mapbox_compassImage="@drawable/ic_compass"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+        
+        <ImageView
+            android:id="@+id/btn_select_style"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/background_multilayer"
+            android:layout_marginEnd="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/_6sdp"
+            android:src="@drawable/ic_multilayer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutSearch"/>
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_my_location"
+            android:background="@drawable/background_multilayer"
+            android:padding="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_14sdp"
+            android:layout_marginEnd="@dimen/_14sdp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
