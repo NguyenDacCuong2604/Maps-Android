@@ -1,26 +1,22 @@
 package com.example.map.activities;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.example.map.R;
@@ -32,14 +28,10 @@ import com.mapbox.maps.ImageHolder;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.LocationPuck2D;
-import com.mapbox.maps.plugin.Plugin;
 import com.mapbox.maps.plugin.gestures.OnMoveListener;
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListener;
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
-import com.mapbox.maps.plugin.scalebar.*;
-import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettings;
-import com.mapbox.maps.plugin.scalebar.generated.ScaleBarSettingsInterface;
 
 import static com.mapbox.maps.plugin.gestures.GesturesUtils.getGestures;
 import static com.mapbox.maps.plugin.locationcomponent.LocationComponentUtils.getLocationComponent;
@@ -49,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
     private ActivityMainBinding activityMainBinding;
     private MapView mapView;
     private SharedPreferences sharedPreferences;
+    private ImageView btnMyLocation;
+    private Point lastKnownPosition;
+    private double scaleView = 16.0;
 
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
@@ -67,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         sharedPreferences = getSharedPreferences("Maps", MODE_PRIVATE);
         this.mapView = activityMainBinding.mapView;
+        this.btnMyLocation = activityMainBinding.btnMyLocation;
         loadStyleInPreferences();
         //Permission
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -83,11 +79,10 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
 
         //My Location
         loadMyLocation();
-
     }
 
     private void loadMyLocation() {
-        mapView.getMapboxMap().setCamera(new CameraOptions.Builder().zoom(16.0).build());
+        mapView.getMapboxMap().setCamera(new CameraOptions.Builder().zoom(scaleView).build());
         LocationComponentPlugin locationComponentPlugin = getLocationComponent(mapView);
         locationComponentPlugin.setEnabled(true);
         LocationPuck2D locationPuck2D = new LocationPuck2D();
@@ -96,6 +91,64 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
         locationComponentPlugin.addOnIndicatorBearingChangedListener(onIndicatorBearingChangedListener);
         locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
         getGestures(mapView).addOnMoveListener(onMoveListener);
+
+        //Event my location
+        btnMyLocation.setOnClickListener(view -> {
+            if (lastKnownPosition != null) {
+                float currentZoom = (float) mapView.getMapboxMap().getCameraState().getZoom(); // Get current zoom
+                animateCameraToPositionWithCurrentScale(lastKnownPosition, currentZoom);
+            } else {
+                Toast.makeText(this, "Current location not available", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void animateCameraToPositionWithCurrentScale(Point targetPosition, double startZoom) {
+        // First animation: Move to the location with the current zoom level
+        ValueAnimator moveAnimator = ValueAnimator.ofFloat(0, 1);
+        moveAnimator.setDuration(1000); // Duration for moving to the position
+        moveAnimator.setInterpolator(new LinearInterpolator());
+
+        Point startPosition = mapView.getMapboxMap().getCameraState().getCenter();
+
+        moveAnimator.addUpdateListener(valueAnimator -> {
+            float fraction = valueAnimator.getAnimatedFraction();
+            double interpolatedLatitude = startPosition.latitude() + (targetPosition.latitude() - startPosition.latitude()) * fraction;
+            double interpolatedLongitude = startPosition.longitude() + (targetPosition.longitude() - startPosition.longitude()) * fraction;
+
+            mapView.getMapboxMap().setCamera(new CameraOptions.Builder()
+                    .center(Point.fromLngLat(interpolatedLongitude, interpolatedLatitude))
+                    .zoom(startZoom) // Maintain current zoom level during movement
+                    .build());
+        });
+
+        moveAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                // Second animation: Zoom in to the desired zoom level (e.g., 16.0) after reaching the location
+                animateZoomToLevel();
+            }
+        });
+
+        moveAnimator.start();
+    }
+
+    private void animateZoomToLevel() {
+        float currentZoom = (float) mapView.getMapboxMap().getCameraState().getZoom();
+
+        ValueAnimator zoomAnimator = ValueAnimator.ofFloat(currentZoom, (float) 16.0);
+        zoomAnimator.setDuration(500); // Duration for zooming in
+        zoomAnimator.setInterpolator(new LinearInterpolator());
+
+        zoomAnimator.addUpdateListener(valueAnimator -> {
+            double zoomLevel = (float) valueAnimator.getAnimatedValue();
+
+            mapView.getMapboxMap().setCamera(new CameraOptions.Builder()
+                    .zoom(zoomLevel)
+                    .build());
+        });
+
+        zoomAnimator.start();
     }
 
     public void loadStyleInPreferences(){
@@ -131,8 +184,9 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
     private final OnIndicatorPositionChangedListener onIndicatorPositionChangedListener = new OnIndicatorPositionChangedListener() {
         @Override
         public void onIndicatorPositionChanged(@NonNull Point point) {
-            mapView.getMapboxMap().setCamera(new CameraOptions.Builder().center(point).zoom(16.0).build());
+            mapView.getMapboxMap().setCamera(new CameraOptions.Builder().center(point).zoom(scaleView).build());
             getGestures(mapView).setFocalPoint(mapView.getMapboxMap().pixelForCoordinate(point));
+            lastKnownPosition = point;
         }
     };
 
