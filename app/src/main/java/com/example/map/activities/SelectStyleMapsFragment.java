@@ -1,7 +1,6 @@
 package com.example.map.activities;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,12 +53,7 @@ public class SelectStyleMapsFragment extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.fragment_select_stylemaps, container, false);
 
         ImageView imageView = view.findViewById(R.id.btn_close);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+        imageView.setOnClickListener(view1 -> dismiss());
 
         frameLayoutDefault = view.findViewById(R.id.frame_image_default);
         frameLayoutSatellite = view.findViewById(R.id.frame_image_satellite);
@@ -78,28 +72,19 @@ public class SelectStyleMapsFragment extends BottomSheetDialogFragment {
         LinearLayout viewSatellite = view.findViewById(R.id.view_satellite);
         LinearLayout viewTerrain = view.findViewById(R.id.view_terrain);
 
-        viewDefault.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadCheckStyle(Style.MAPBOX_STREETS);
-                listener.onMapStyleSelected("default");
-            }
+        viewDefault.setOnClickListener(v -> {
+            loadCheckStyle(Style.MAPBOX_STREETS);
+            listener.onMapStyleSelected("default");
         });
 
-        viewSatellite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadCheckStyle(Style.SATELLITE_STREETS);
-                listener.onMapStyleSelected("satellite");
-            }
+        viewSatellite.setOnClickListener(v -> {
+            loadCheckStyle(Style.SATELLITE_STREETS);
+            listener.onMapStyleSelected("satellite");
         });
 
-        viewTerrain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadCheckStyle(Style.OUTDOORS);
-                listener.onMapStyleSelected("terrain");
-            }
+        viewTerrain.setOnClickListener(v -> {
+            loadCheckStyle(Style.OUTDOORS);
+            listener.onMapStyleSelected("terrain");
         });
 
         return view;
