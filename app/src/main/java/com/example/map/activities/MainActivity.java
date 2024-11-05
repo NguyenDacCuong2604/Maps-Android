@@ -16,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
     private ImageView btnMyLocation;
     private Point lastKnownPosition;
     private double scaleView = 16.0;
+    private boolean isMyLocation = true;
 
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
@@ -94,11 +96,17 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
 
         //Event my location
         btnMyLocation.setOnClickListener(view -> {
-            if (lastKnownPosition != null) {
-                float currentZoom = (float) mapView.getMapboxMap().getCameraState().getZoom(); // Get current zoom
-                animateCameraToPositionWithCurrentScale(lastKnownPosition, currentZoom);
-            } else {
-                Toast.makeText(this, "Current location not available", Toast.LENGTH_SHORT).show();
+            if(!isMyLocation){
+                isMyLocation = true;
+                btnMyLocation.setImageResource(R.drawable.ic_my_location);
+                btnMyLocation.setBackgroundResource(R.drawable.background_focus);
+                if (lastKnownPosition != null) {
+                    float currentZoom = (float) mapView.getMapboxMap().getCameraState().getZoom(); // Get current zoom
+                    animateCameraToPositionWithCurrentScale(lastKnownPosition, currentZoom);
+                } else {
+                    Toast.makeText(this, "Current location not available", Toast.LENGTH_SHORT).show();
+                }
+                getGestures(mapView).addOnMoveListener(onMoveListener);
             }
         });
     }
@@ -106,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
     private void animateCameraToPositionWithCurrentScale(Point targetPosition, double startZoom) {
         // First animation: Move to the location with the current zoom level
         ValueAnimator moveAnimator = ValueAnimator.ofFloat(0, 1);
-        moveAnimator.setDuration(1000); // Duration for moving to the position
+        moveAnimator.setDuration(600); // Duration for moving to the position
         moveAnimator.setInterpolator(new LinearInterpolator());
 
         Point startPosition = mapView.getMapboxMap().getCameraState().getCenter();
@@ -137,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
         float currentZoom = (float) mapView.getMapboxMap().getCameraState().getZoom();
 
         ValueAnimator zoomAnimator = ValueAnimator.ofFloat(currentZoom, (float) 16.0);
-        zoomAnimator.setDuration(500); // Duration for zooming in
+        zoomAnimator.setDuration(600); // Duration for zooming in
         zoomAnimator.setInterpolator(new LinearInterpolator());
 
         zoomAnimator.addUpdateListener(valueAnimator -> {
@@ -196,6 +204,12 @@ public class MainActivity extends AppCompatActivity implements SelectStyleMapsFr
             getLocationComponent(mapView).removeOnIndicatorBearingChangedListener(onIndicatorBearingChangedListener);
             getLocationComponent(mapView).removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
             getGestures(mapView).removeOnMoveListener(onMoveListener);
+            if(isMyLocation){
+                isMyLocation = false;
+                btnMyLocation.setImageResource(R.drawable.ic_out_location);
+                btnMyLocation.setBackgroundResource(R.drawable.background_multilayer);
+            }
+
         }
 
         @Override

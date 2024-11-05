@@ -98,7 +98,7 @@
             android:layout_height="48dp"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_my_location"
-            android:background="@drawable/background_multilayer"
+            android:background="@drawable/background_focus"
             android:padding="@dimen/_8sdp"
             android:layout_marginBottom="@dimen/_14sdp"
             android:layout_marginEnd="@dimen/_14sdp"
